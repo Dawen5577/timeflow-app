@@ -6,7 +6,7 @@ import { zhCN } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { Category, TimeBlock } from '@/types';
 import { Plus, X, Clock, ChevronRight, ChevronLeft, Trash2, Edit2, RefreshCw } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
+import { supabase, supabaseOrigin, getSupabaseDiagnostics } from '@/lib/supabase/client';
 import { withTimeout, isValidCategory, isValidBlock } from '@/lib/timeline';
 
 
@@ -393,6 +393,10 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
       setLoadMeta({ date: format(selectedDate, 'yyyy-MM-dd'), count: validBlocks.length, sample: validBlocks.slice(0, 3).map(b => b.notes?.slice(0, 50) || '') });
     } catch (err) {
       console.error('Failed to load data:', err);
+      try {
+        const diag = getSupabaseDiagnostics();
+        console.info('API404Check', { supabaseOrigin, endpoints: { categories: `${supabaseOrigin}/rest/v1/categories`, time_blocks: `${supabaseOrigin}/rest/v1/time_blocks` }, diag });
+      } catch { }
       setError('加载数据失败，请稍后重试');
     } finally {
       setIsLoading(false);
@@ -707,6 +711,10 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
       loadData();
     } catch (err) {
       console.error('Failed to save time block:', err);
+      try {
+        const diag = getSupabaseDiagnostics();
+        console.info('API404Check', { supabaseOrigin, endpoint: `${supabaseOrigin}/rest/v1/time_blocks`, diag });
+      } catch { }
 
       // 如果是Supabase错误，使用模拟数据作为后备
       const mockBlock: TimeBlock = {
@@ -785,6 +793,10 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
         loadData();
       } catch (err) {
         console.error('Failed to delete time block:', err);
+        try {
+          const diag = getSupabaseDiagnostics();
+          console.info('API404Check', { supabaseOrigin, endpoint: `${supabaseOrigin}/rest/v1/time_blocks`, diag });
+        } catch { }
         setError('删除时间块失败，请稍后重试');
       }
     }
