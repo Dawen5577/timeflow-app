@@ -653,40 +653,28 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
 
     try {
       const user_id = userId;
-      let result;
+      const payload = {
+        id: editingBlockId || undefined,
+        user_id,
+        start_time: newStart.toISOString(),
+        end_time: newEnd.toISOString(),
+        category_id: selectedCategoryId,
+        group_id: DEFAULT_GROUP_ID,
+        notes: sanitizedNote,
+        mood_rating: 3
+      };
 
-      if (editingBlockId) {
-        // 更新现有时间块，包含group_id
-        result = await supabase
-          .from('time_blocks')
-          .update({
-            start_time: newStart.toISOString(),
-            end_time: newEnd.toISOString(),
-            category_id: selectedCategoryId,
-            group_id: DEFAULT_GROUP_ID, // 添加默认分组ID
-            notes: sanitizedNote,
-            mood_rating: 3
-          })
-          .eq('id', editingBlockId)
-          .eq('user_id', user_id)
-          .select();
-      } else {
-        // 创建新时间块，包含group_id
-        result = await supabase
-          .from('time_blocks')
-          .insert({
-            user_id,
-            start_time: newStart.toISOString(),
-            end_time: newEnd.toISOString(),
-            category_id: selectedCategoryId,
-            group_id: DEFAULT_GROUP_ID, // 添加默认分组ID
-            notes: sanitizedNote,
-            mood_rating: 3
-          })
-          .select();
+      const resp = await fetch('/api/time-blocks', {
+        method: editingBlockId ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+
+      if (!resp.ok) {
+        const errJson = await resp.json().catch(() => ({}));
+        throw new Error(errJson?.details?.[0] || '请求格式错误');
       }
-
-      if (result.error) throw result.error;
+      const result = await resp.json();
 
       if (!editingBlockId) {
         const inserted = Array.isArray((result as any).data) ? (result as any).data[0] : null;
@@ -716,7 +704,7 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
         console.info('API404Check', { supabaseOrigin, endpoint: `${supabaseOrigin}/rest/v1/time_blocks`, diag });
       } catch { }
 
-      // 如果是Supabase错误，使用模拟数据作为后备
+      // 如果是错误请求，提示具体原因；否则使用模拟数据作为后备
       const mockBlock: TimeBlock = {
         id: editingBlockId || `new-${Date.now()}`,
         user_id: userId,
@@ -762,23 +750,10 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
       try {
         const user_id = userId;
         console.log('DeleteAttempt', { id: editingBlockId, user_id });
-        const { error, data } = await supabase
-          .from('time_blocks')
-          .delete()
-          .eq('id', editingBlockId)
-          .eq('user_id', user_id);
-        if (error) throw error;
-
-        const verify = await supabase
-          .from('time_blocks')
-          .select('id')
-          .eq('id', editingBlockId)
-          .eq('user_id', user_id)
-          .maybeSingle();
-        console.log('DeleteVerify', { remaining: verify.data });
-
-        if (verify.data) {
-          throw new Error('删除未生效');
+        const resp = await fetch('/api/time-blocks', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingBlockId, user_id }) });
+        if (!resp.ok) {
+          const errJson = await resp.json().catch(() => ({}));
+          throw new Error(errJson?.details?.[0] || '请求格式错误');
         }
 
         setIsModalOpen(false);
@@ -797,7 +772,7 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
           const diag = getSupabaseDiagnostics();
           console.info('API404Check', { supabaseOrigin, endpoint: `${supabaseOrigin}/rest/v1/time_blocks`, diag });
         } catch { }
-        setError('删除时间块失败，请稍后重试');
+        setError('删除时间块失败：' + String((err as any)?.message || err));
       }
     }
   };
