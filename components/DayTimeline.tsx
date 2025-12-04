@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Category, TimeBlock } from '@/types';
 import { Plus, X, Clock, ChevronRight, ChevronLeft, Trash2, Edit2, RefreshCw } from 'lucide-react';
 import { supabase, supabaseOrigin, getSupabaseDiagnostics } from '@/lib/supabase/client';
+import { restInsert, restUpdate, restDelete } from '@/lib/supabase/rest';
 import { withTimeout, isValidCategory, isValidBlock } from '@/lib/timeline';
 
 
@@ -664,17 +665,16 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
         mood_rating: 3
       };
 
-      const resp = await fetch('/api/time-blocks', {
-        method: editingBlockId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-
-      if (!resp.ok) {
-        const errJson = await resp.json().catch(() => ({}));
-        throw new Error(errJson?.details?.[0] || '请求格式错误');
-      }
-      const result = await resp.json();
+      const result = editingBlockId
+        ? await restUpdate('time_blocks', { id: editingBlockId, user_id }, {
+          start_time: payload.start_time,
+          end_time: payload.end_time,
+          category_id: payload.category_id,
+          group_id: payload.group_id,
+          notes: payload.notes,
+          mood_rating: payload.mood_rating
+        })
+        : await restInsert('time_blocks', payload)
 
       if (!editingBlockId) {
         const inserted = Array.isArray((result as any).data) ? (result as any).data[0] : null;
@@ -750,11 +750,7 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
       try {
         const user_id = userId;
         console.log('DeleteAttempt', { id: editingBlockId, user_id });
-        const resp = await fetch('/api/time-blocks', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editingBlockId, user_id }) });
-        if (!resp.ok) {
-          const errJson = await resp.json().catch(() => ({}));
-          throw new Error(errJson?.details?.[0] || '请求格式错误');
-        }
+        await restDelete('time_blocks', { id: editingBlockId, user_id });
 
         setIsModalOpen(false);
         setBlocks(prev => prev.filter(b => b.id !== editingBlockId));
