@@ -19,7 +19,6 @@ export async function POST(req: Request) {
         start_time: body.start_time,
         end_time: body.end_time,
         category_id: body.category_id,
-        group_id: body.group_id,
         notes: body.notes,
         mood_rating: body.mood_rating ?? 3
       })
@@ -47,7 +46,6 @@ export async function PUT(req: Request) {
         start_time: body.start_time,
         end_time: body.end_time,
         category_id: body.category_id,
-        group_id: body.group_id,
         notes: body.notes,
         mood_rating: body.mood_rating ?? 3
       })
@@ -82,4 +80,3 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: 'Bad Request', details: [String(e?.message || e)] }, { status: 400 })
   }
 }
-
