@@ -22,3 +22,19 @@ export function validateTimeBlockPayload(body: any) {
   return { ok: errors.length === 0, errors }
 }
 
+/**
+ * 允许字段白名单过滤：只保留与数据库 schema 匹配的字段
+ */
+export function sanitizeTimeBlock(body: any) {
+  const allowed = ['id','category_id','user_id','start_time','end_time','notes','mood_rating']
+  const out: any = {}
+  allowed.forEach(k => { if (body[k] !== undefined) out[k] = body[k] })
+  return out
+}
+
+export function sanitizeCategory(body: any) {
+  const allowed = ['id','user_id','name','color','type']
+  const out: any = {}
+  allowed.forEach(k => { if (body[k] !== undefined) out[k] = body[k] })
+  return out
+}

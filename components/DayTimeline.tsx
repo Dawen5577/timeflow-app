@@ -660,7 +660,6 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
         start_time: newStart.toISOString(),
         end_time: newEnd.toISOString(),
         category_id: selectedCategoryId,
-        group_id: DEFAULT_GROUP_ID,
         notes: sanitizedNote,
         mood_rating: 3
       };
@@ -670,7 +669,6 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
           start_time: payload.start_time,
           end_time: payload.end_time,
           category_id: payload.category_id,
-          group_id: payload.group_id,
           notes: payload.notes,
           mood_rating: payload.mood_rating
         })
@@ -711,7 +709,6 @@ export default function DayTimeline({ initialBlocks = [] }: DayTimelineProps) {
         start_time: newStart.toISOString(),
         end_time: newEnd.toISOString(),
         category_id: selectedCategoryId,
-        group_id: DEFAULT_GROUP_ID,
         notes: note,
         mood_rating: 3
       };

@@ -1,4 +1,5 @@
 import { supabaseOrigin, supabaseAnonKeyPublic } from '@/lib/supabase/client'
+import { sanitizeTimeBlock, sanitizeCategory } from '@/lib/validation'
 
 async function parseJson(resp: Response) {
   try { return await resp.json() } catch { return null }
@@ -6,6 +7,7 @@ async function parseJson(resp: Response) {
 
 export async function restInsert<T>(table: string, row: T) {
   const url = `${supabaseOrigin}/rest/v1/${table}`
+  const payload = table === 'time_blocks' ? sanitizeTimeBlock(row) : table === 'categories' ? sanitizeCategory(row) : row
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -14,7 +16,7 @@ export async function restInsert<T>(table: string, row: T) {
       'Authorization': `Bearer ${supabaseAnonKeyPublic}`,
       'Prefer': 'return=representation'
     },
-    body: JSON.stringify(row)
+    body: JSON.stringify(payload)
   })
   const data = await parseJson(resp)
   if (!resp.ok) {
@@ -28,6 +30,7 @@ export async function restUpdate<T>(table: string, filters: Record<string, strin
   const params = new URLSearchParams()
   Object.entries(filters).forEach(([k, v]) => params.append(`${k}=eq.${v}`))
   const url = `${supabaseOrigin}/rest/v1/${table}?${params.toString()}`
+  const payload = table === 'time_blocks' ? sanitizeTimeBlock(patch) : table === 'categories' ? sanitizeCategory(patch) : patch
   const resp = await fetch(url, {
     method: 'PATCH',
     headers: {
@@ -36,7 +39,7 @@ export async function restUpdate<T>(table: string, filters: Record<string, strin
       'Authorization': `Bearer ${supabaseAnonKeyPublic}`,
       'Prefer': 'return=representation'
     },
-    body: JSON.stringify(patch)
+    body: JSON.stringify(payload)
   })
   const data = await parseJson(resp)
   if (!resp.ok) {
@@ -65,4 +68,3 @@ export async function restDelete(table: string, filters: Record<string, string>)
   }
   return data
 }
-
