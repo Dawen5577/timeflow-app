@@ -16,7 +16,7 @@ export default function Home() {
     { id: '6', user_id: 'user-1', name: 'Learning', color: '#3b82f6', type: 'productive' },
   ]);
 
-  // Mock time blocks data - 修复类型定义，移除category字段，添加group_id
+  // Mock time blocks data
   const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>([
     {
       id: '1',
@@ -24,7 +24,6 @@ export default function Home() {
       start_time: new Date(new Date().setHours(9, 0, 0)).toISOString(),
       end_time: new Date(new Date().setHours(10, 30, 0)).toISOString(),
       category_id: '1',
-      group_id: 'default-group',
       notes: 'Worked on project documentation',
       mood_rating: 4,
     },
@@ -34,7 +33,6 @@ export default function Home() {
       start_time: new Date(new Date().setHours(11, 0, 0)).toISOString(),
       end_time: new Date(new Date().setHours(12, 0, 0)).toISOString(),
       category_id: '2',
-      group_id: 'default-group',
       notes: 'Team sync meeting',
       mood_rating: 3,
     },
@@ -44,7 +42,6 @@ export default function Home() {
       start_time: new Date(new Date().setHours(13, 0, 0)).toISOString(),
       end_time: new Date(new Date().setHours(14, 0, 0)).toISOString(),
       category_id: '3',
-      group_id: 'default-group',
       notes: 'Lunch break',
       mood_rating: 5,
     },
@@ -63,7 +60,6 @@ export default function Home() {
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
       category_id: categoryId,
-      group_id: 'default-group',
       notes,
       mood_rating: moodRating,
     };

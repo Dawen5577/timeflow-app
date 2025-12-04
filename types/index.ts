@@ -12,7 +12,6 @@ export interface TimeBlock {
   start_time: string;
   end_time: string;
   category_id: string;
-  group_id?: string; // 添加分组ID字段
   notes?: string;
   mood_rating?: number;
   category?: Category;

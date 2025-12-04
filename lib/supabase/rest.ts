@@ -26,9 +26,9 @@ export async function restInsert<T>(table: string, row: T) {
   return data
 }
 
-export async function restUpdate<T>(table: string, filters: Record<string, string>, patch: T) {
+export async function restUpdate<T>(table: string, filters: Record<string, string | number>, patch: T) {
   const params = new URLSearchParams()
-  Object.entries(filters).forEach(([k, v]) => params.append(`${k}=eq.${v}`))
+  Object.entries(filters).forEach(([k, v]) => params.append(String(k), `eq.${v}`))
   const url = `${supabaseOrigin}/rest/v1/${table}?${params.toString()}`
   const payload = table === 'time_blocks' ? sanitizeTimeBlock(patch) : table === 'categories' ? sanitizeCategory(patch) : patch
   const resp = await fetch(url, {
@@ -49,9 +49,9 @@ export async function restUpdate<T>(table: string, filters: Record<string, strin
   return data
 }
 
-export async function restDelete(table: string, filters: Record<string, string>) {
+export async function restDelete(table: string, filters: Record<string, string | number>) {
   const params = new URLSearchParams()
-  Object.entries(filters).forEach(([k, v]) => params.append(`${k}=eq.${v}`))
+  Object.entries(filters).forEach(([k, v]) => params.append(String(k), `eq.${v}`))
   const url = `${supabaseOrigin}/rest/v1/${table}?${params.toString()}`
   const resp = await fetch(url, {
     method: 'DELETE',
